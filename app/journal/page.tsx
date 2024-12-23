@@ -6,19 +6,50 @@ import { JournalEntryList } from '@/components/JournalEntryList';
 import { saveJournalEntry, getJournalEntries } from '@/lib/journal';
 import type { JournalEntry } from '@/lib/types';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/lib/supabase';
 
 export default function JournalPage() {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function getUser() {
+      try {
+        // テストユーザーでログイン
+        const { data, error } = await supabase.auth.signInWithOtp({
+          email: '',
+          options: {
+            emailRedirectTo: 'http://localhost:3000/journal'  // リダイレクト先URL
+          }
+        });
+
+        if (error) {
+          console.error('マジックリンク送信エラー:', error);
+          return;
+        }
+
+        console.log('マジックリンクを送信しました。メールを確認してください。');
+
+        // ログイン成功後にユーザーIDを設定
+        setUserId(data.user.id);
+        console.log('認証済みユーザーID:', data.user.id);
+      } catch (error) {
+        console.error('認証エラー:', error);
+      }
+    }
+    getUser();
+  }, []);
 
   useEffect(() => {
     loadEntries();
-  }, []);
+  }, [userId]);
 
   const loadEntries = async () => {
+    if (!userId) return;
     try {
-      const data = await getJournalEntries('user-1'); // TODO: Replace with actual user ID
+      const data = await getJournalEntries(userId);
       setEntries(data);
     } catch (error) {
       toast({
@@ -32,14 +63,19 @@ export default function JournalPage() {
   };
 
   const handleSaveEntry = async (entry: Omit<JournalEntry, 'id' | 'userId'>) => {
+    console.log('handleSaveEntryが呼ばれました')
+    if (!userId) return; // ここでreturnされている
+    console.log('try処理を行います')
     try {
       const newEntry = await saveJournalEntry({
         ...entry,
-        userId: 'user-1', // TODO: Replace with actual user ID
+        userId: userId,
       });
-      
+
+      console.log('New Journal Entry:', newEntry);
+
       setEntries((prev) => [newEntry, ...prev]);
-      
+
       toast({
         title: '保存完了',
         description: '日記を保存しました。',
@@ -56,9 +92,9 @@ export default function JournalPage() {
   return (
     <div className="container mx-auto p-4 space-y-6">
       <h1 className="text-2xl font-bold text-center mb-8">ジャーナル</h1>
-      
+
       <JournalEditor onSave={handleSaveEntry} />
-      
+
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">過去の記録</h2>
         {isLoading ? (
