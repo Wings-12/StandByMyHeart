@@ -1,7 +1,7 @@
 import { google } from 'googleapis';
 
 export class ActivityMonitor {
-  private calendar = google.calendar('v4');
+  private calendar = google.calendar('v3');
   private sheets = google.sheets('v4');
 
   async getUpcomingEvents(userId: string) {
@@ -17,7 +17,7 @@ export class ActivityMonitor {
   async syncActivities(userId: string) {
     const events = await this.getUpcomingEvents(userId);
     const journalEntries = await this.getJournalEntries(userId);
-    
+
     return {
       events,
       journalEntries,
