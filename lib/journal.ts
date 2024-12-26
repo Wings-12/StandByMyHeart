@@ -22,3 +22,12 @@ export async function getJournalEntries(userId: string) {
   if (error) throw error;
   return data;
 }
+
+export async function deleteJournalEntry(id: string, userId: string) {
+  const { error } = await supabase
+    .from('journal_entries')
+    .delete()
+    .match({ id, userId });
+
+  if (error) throw error;
+}

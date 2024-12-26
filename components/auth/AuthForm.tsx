@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { signIn, signUp } from '@/lib/auth';
 import { AuthError } from '@supabase/supabase-js';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function AuthForm() {
   const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ export function AuthForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const validateForm = () => {
     if (!email || !password) {
@@ -51,7 +53,7 @@ export function AuthForm() {
             description: 'アカウント登録のための確認メールを送信しました。メールを確認してアカウントを有効化してください。',
           });
           setIsSignUp(false);
-        } else { // このelseは必要なのか？userがnullの場合はエラーになるので、その旨のエラー処理をすべきでは？
+        } else {
           toast({
             title: '確認メール送信',
             description: '確認メールを送信しました。メールを確認してアカウントを有効化してください。',
@@ -63,6 +65,7 @@ export function AuthForm() {
           title: 'ログイン成功',
           description: 'ログインしました。',
         });
+        router.push('/journal');
       }
     } catch (error) {
       const message = error instanceof AuthError

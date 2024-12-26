@@ -4,29 +4,50 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
+const getRedirectURL = () => {
+  const env = process.env.NODE_ENV;
+  return env === 'development'
+    ? 'http://localhost:3000/auth/callback'
+    : 'https://stupendous-bunny-b18132.netlify.app/auth/callback';
+}
+
 export default function AuthCallbackPage() {
-    const router = useRouter();
+  const router = useRouter();
 
-    useEffect(() => {
-      // デバッグ用のログを追加
-      console.log('AuthCallbackPage mounted');
+  useEffect(() => {
+    const handleAuthCallback = async () => {
+      try {
+        const redirectURL = getRedirectURL();
 
-      supabase.auth.onAuthStateChange((event, session) => {
-        console.log('Auth state changed:', event, session); // 認証状態の変更を確認
+        // セッションの取得を試みる
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-        if (event === 'SIGNED_IN') {
-          console.log('Redirecting to /journal'); // リダイレクト前のログ
-          router.push('/journal');
+        if (error) {
+          console.error('認証エラー:', error.message);
+          router.push('/auth');
+          return;
         }
-      });
 
-      // 現在のセッション状態を確認
-      const checkSession = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Current session:', session);
-      };
-      checkSession();
-    }, [router]);
+        if (session) {
+          router.push('/journal');
+        } else {
+          router.push('/auth');
+        }
+      } catch (error) {
+        console.error('コールバックエラー:', error);
+        router.push('/auth');
+      }
+    };
 
-    return <div>認証処理中...</div>;
-  }
+    handleAuthCallback();
+  }, [router]);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-xl font-semibold mb-2">認証処理中...</h2>
+        <p className="text-muted-foreground">しばらくお待ちください</p>
+      </div>
+    </div>
+  );
+}

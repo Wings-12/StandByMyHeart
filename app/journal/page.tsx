@@ -59,8 +59,12 @@ export default function JournalPage() {
     }
   };
 
+  const handleDeleteEntry = (id: string) => {
+    setEntries((prev) => prev.filter(entry => entry.id !== id));
+  };
+
   if (!user) {
-    return null; // ミドルウェアがリダイレクトを処理するため
+    return null;
   }
 
   return (
@@ -74,7 +78,7 @@ export default function JournalPage() {
         {isLoading ? (
           <div className="text-center p-4">読み込み中...</div>
         ) : (
-          <JournalEntryList entries={entries} />
+          <JournalEntryList entries={entries} onDelete={handleDeleteEntry} />
         )}
       </div>
     </div>

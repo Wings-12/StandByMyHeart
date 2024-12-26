@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Toaster } from "@/components/ui/toaster";
 import { Providers } from './providers';
 import { AuthProvider } from '@/components/auth/AuthProvider';
+import { LogoutButton } from '@/components/LogoutButton';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,16 +26,19 @@ export default function RootLayout({
           <AuthProvider>
             <nav className="border-b">
               <div className="container mx-auto px-4 py-3">
-                <div className="flex gap-4">
+                <div className="flex gap-4 items-center">
                   <Link href="/" className="hover:text-primary">
                     AIコーチング
                   </Link>
                   <Link href="/journal" className="hover:text-primary">
                     ジャーナル
                   </Link>
-                  <Link href="/auth" className="hover:text-primary ml-auto">
-                    ログイン
-                  </Link>
+                  <div className="ml-auto flex items-center gap-4">
+                    <Link href="/auth" className="hover:text-primary">
+                      ログイン
+                    </Link>
+                    <LogoutButton />
+                  </div>
                 </div>
               </div>
             </nav>
