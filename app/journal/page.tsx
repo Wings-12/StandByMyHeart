@@ -6,50 +6,24 @@ import { JournalEntryList } from '@/components/JournalEntryList';
 import { saveJournalEntry, getJournalEntries } from '@/lib/journal';
 import type { JournalEntry } from '@/lib/types';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export default function JournalPage() {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const [userId, setUserId] = useState<string | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
-    async function getUser() {
-      try {
-        // テストユーザーでログイン
-        const { data, error } = await supabase.auth.signInWithOtp({
-          email: '',
-          options: {
-            emailRedirectTo: 'http://localhost:3000/journal'  // リダイレクト先URL
-          }
-        });
-
-        if (error) {
-          console.error('マジックリンク送信エラー:', error);
-          return;
-        }
-
-        console.log('マジックリンクを送信しました。メールを確認してください。');
-
-        // ログイン成功後にユーザーIDを設定
-        setUserId(data.user.id);
-        console.log('認証済みユーザーID:', data.user.id);
-      } catch (error) {
-        console.error('認証エラー:', error);
-      }
+    if (user) {
+      loadEntries();
     }
-    getUser();
-  }, []);
-
-  useEffect(() => {
-    loadEntries();
-  }, [userId]);
+  }, [user]);
 
   const loadEntries = async () => {
-    if (!userId) return;
+    if (!user?.id) return;
     try {
-      const data = await getJournalEntries(userId);
+      const data = await getJournalEntries(user.id);
       setEntries(data);
     } catch (error) {
       toast({
@@ -63,16 +37,12 @@ export default function JournalPage() {
   };
 
   const handleSaveEntry = async (entry: Omit<JournalEntry, 'id' | 'userId'>) => {
-    console.log('handleSaveEntryが呼ばれました')
-    if (!userId) return; // ここでreturnされている
-    console.log('try処理を行います')
+    if (!user?.id) return;
     try {
       const newEntry = await saveJournalEntry({
         ...entry,
-        userId: userId,
+        userId: user.id,
       });
-
-      console.log('New Journal Entry:', newEntry);
 
       setEntries((prev) => [newEntry, ...prev]);
 
@@ -88,6 +58,10 @@ export default function JournalPage() {
       });
     }
   };
+
+  if (!user) {
+    return null; // ミドルウェアがリダイレクトを処理するため
+  }
 
   return (
     <div className="container mx-auto p-4 space-y-6">
