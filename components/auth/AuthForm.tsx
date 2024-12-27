@@ -122,27 +122,29 @@ export function AuthForm() {
         </Button>
       </form>
       <div className="mt-4 text-center space-y-2">
-        <button
-          type="button"
-          onClick={() => {
-            setIsSignUp(!isSignUp);
-            setEmail('');
-            setPassword('');
-          }}
-          className="text-sm text-primary hover:underline block"
-        >
-          {isSignUp
-            ? 'すでにアカウントをお持ちの方はこちら'
-            : 'アカウントをお持ちでない方はこちら'}
-        </button>
-        {!isSignUp && (
-          <Link
-            href="/auth/reset-password"
-            className="text-sm text-primary hover:underline block"
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => {
+              setIsSignUp(!isSignUp);
+              setEmail('');
+              setPassword('');
+            }}
+            className="text-sm text-primary hover:underline"
           >
-            パスワードをお忘れの方はこちら
-          </Link>
-        )}
+            {isSignUp
+              ? 'すでにアカウントをお持ちの方はこちら'
+              : 'アカウントをお持ちでない方はこちら'}
+          </button>
+          {!isSignUp && (
+            <Link
+              href="/auth/reset-password"
+              className="text-sm text-primary hover:underline mt-2 inline-block"
+            >
+              パスワードをお忘れの方はこちら
+            </Link>
+          )}
+        </div>
       </div>
     </Card>
   );

@@ -31,7 +31,7 @@ export default function RootLayout({
                     AIコーチング
                   </Link>
                   <Link href="/journal" className="hover:text-primary">
-                    ジャーナル
+                    日記
                   </Link>
                   <div className="ml-auto flex items-center gap-4">
                     <Link href="/auth" className="hover:text-primary">
