@@ -44,7 +44,7 @@ export function JournalEntryList({ entries, onDelete }: JournalEntryListProps) {
 
   const handleDelete = async (id: string) => {
     if (!user) return;
-    
+
     try {
       await deleteJournalEntry(id, user.id);
       onDelete?.(id);
@@ -68,7 +68,7 @@ export function JournalEntryList({ entries, onDelete }: JournalEntryListProps) {
           <div key={entry.id} className="mb-6 last:mb-0">
             <div className="flex items-center justify-between mb-2">
               <time className="text-sm text-muted-foreground">
-                {format(new Date(entry.timestamp), 'PPP', { locale: ja })}
+                {format(new Date(entry.timestamp), 'PPP (E) HH:mm', { locale: ja })}
               </time>
               <div className="flex items-center gap-2">
                 <span className="text-xl" title={`感情レベル: ${entry.emotionLevel}`}>
