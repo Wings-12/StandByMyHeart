@@ -1,15 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Card } from '@/components/ui/card';
 
 interface EmotionLevelBarProps {
   onLevelChange: (level: number) => void;
+  initialLevel?: number;
 }
 
-export function EmotionLevelBar({ onLevelChange }: EmotionLevelBarProps) {
-  const [level, setLevel] = useState(3);
+export function EmotionLevelBar({ onLevelChange, initialLevel = 3 }: EmotionLevelBarProps) {
+  const [level, setLevel] = useState(initialLevel);
+
+  useEffect(() => {
+    setLevel(initialLevel);
+  }, [initialLevel]);
 
   const handleChange = (value: number[]) => {
     setLevel(value[0]);

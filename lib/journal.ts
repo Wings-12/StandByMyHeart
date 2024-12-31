@@ -12,6 +12,24 @@ export async function saveJournalEntry(entry: Omit<JournalEntry, 'id'>) {
   return data;
 }
 
+export async function updateJournalEntry(entry: JournalEntry) {
+  const { data, error } = await supabase
+    .from('journal_entries')
+    .update({
+      content: entry.content,
+      emotionLevel: entry.emotionLevel,
+      timestamp: entry.timestamp,
+      tags: entry.tags,
+    })
+    .eq('id', entry.id)
+    .eq('userId', entry.userId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getJournalEntries(userId: string) {
   const { data, error } = await supabase
     .from('journal_entries')

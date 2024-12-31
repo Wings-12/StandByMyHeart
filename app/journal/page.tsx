@@ -63,6 +63,14 @@ export default function JournalPage() {
     setEntries((prev) => prev.filter(entry => entry.id !== id));
   };
 
+  const handleUpdateEntry = (updatedEntry: JournalEntry) => {
+    setEntries((prev) =>
+      prev.map((entry) =>
+        entry.id === updatedEntry.id ? updatedEntry : entry
+      )
+    );
+  };
+
   if (!user) {
     return null;
   }
@@ -78,7 +86,11 @@ export default function JournalPage() {
         {isLoading ? (
           <div className="text-center p-4">読み込み中...</div>
         ) : (
-          <JournalEntryList entries={entries} onDelete={handleDeleteEntry} />
+          <JournalEntryList
+            entries={entries}
+            onDelete={handleDeleteEntry}
+            onUpdate={handleUpdateEntry}
+          />
         )}
       </div>
     </div>
