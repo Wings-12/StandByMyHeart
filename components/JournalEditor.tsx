@@ -6,7 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { EmotionLevelBar } from '@/components/EmotionLevelBar';
-import type { JournalEntry } from '@/lib/types';
+import { TemplateSelector } from '@/components/journal/TemplateSelector';
+import { TemplateDialog } from '@/components/journal/TemplateDialog';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { getJournalSettings } from '@/lib/journal';
+import type { JournalEntry, JournalTemplate } from '@/lib/types';
 
 interface JournalEditorProps {
   onSave: (entry: Omit<JournalEntry, 'id' | 'userId'>) => Promise<void>;
@@ -18,6 +22,9 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
   const [content, setContent] = useState('');
   const [emotionLevel, setEmotionLevel] = useState(3);
   const [date, setDate] = useState<Date>(new Date());
+  const [templates, setTemplates] = useState<JournalTemplate[]>([]);
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (initialEntry) {
@@ -27,13 +34,31 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
     }
   }, [initialEntry]);
 
+  useEffect(() => {
+    if (user) {
+      loadTemplates();
+    }
+  }, [user]);
+
+  const loadTemplates = async () => {
+    if (!user) return;
+    try {
+      const settings = await getJournalSettings(user.id);
+      if (settings?.templates) {
+        setTemplates(settings.templates);
+      }
+    } catch (error) {
+      console.error('テンプレートの読み込みに失敗しました:', error);
+    }
+  };
+
   const handleSave = async () => {
     if (content.trim()) {
       await onSave({
         content,
         emotionLevel,
         timestamp: date,
-        tags: [], // TODO: Implement tag functionality
+        tags: [],
       });
       if (!initialEntry) {
         setContent('');
@@ -43,13 +68,43 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
     }
   };
 
+  const handleSelectTemplate = (template: JournalTemplate) => {
+    setContent(prev => {
+      // 既存の内容があれば、テンプレートを追加
+      if (prev.trim()) {
+        return `${prev}\n\n${template.content}`;
+      }
+      // 内容が空の場合は、テンプレートをそのまま設定
+      return template.content;
+    });
+  };
+
+  const handleSaveTemplate = async (template: Omit<JournalTemplate, 'id' | 'userId'>) => {
+    if (!user) return;
+    
+    const newTemplate: JournalTemplate = {
+      ...template,
+      id: crypto.randomUUID(),
+      userId: user.id,
+    };
+
+    setTemplates(prev => [...prev, newTemplate]);
+  };
+
   return (
     <Card className="p-6 space-y-6">
       <div className="flex flex-col md:flex-row gap-6">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold mb-4">
-            {initialEntry ? '記録を編集' : '日記を書く'}
-          </h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">
+              {initialEntry ? '記録を編集' : '日記を書く'}
+            </h3>
+            <TemplateSelector
+              templates={templates}
+              onSelectTemplate={handleSelectTemplate}
+              onAddTemplate={() => setIsTemplateDialogOpen(true)}
+            />
+          </div>
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -80,6 +135,12 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
           {initialEntry ? '更新する' : '保存する'}
         </Button>
       </div>
+
+      <TemplateDialog
+        open={isTemplateDialogOpen}
+        onOpenChange={setIsTemplateDialogOpen}
+        onSave={handleSaveTemplate}
+      />
     </Card>
   );
 }

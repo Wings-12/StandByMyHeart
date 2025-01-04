@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Providers } from './providers';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { LogoutButton } from '@/components/LogoutButton';
+import { SettingsButton } from '@/components/SettingsButton';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -38,6 +39,7 @@ export default function RootLayout({
                       ログイン
                     </Link>
                     <LogoutButton />
+                    <SettingsButton />
                   </div>
                 </div>
               </div>

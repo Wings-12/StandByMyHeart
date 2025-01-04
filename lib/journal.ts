@@ -1,28 +1,15 @@
 import { supabase } from './supabase';
-import type { JournalEntry } from './types';
+import type { JournalEntry, JournalSettings } from './types';
 
-export async function saveJournalEntry(entry: Omit<JournalEntry, 'id'>) {
+// ... 既存のコード ...
+
+export async function updateJournalSettings(userId: string, settings: JournalSettings) {
   const { data, error } = await supabase
-    .from('journal_entries')
-    .insert([entry])
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-export async function updateJournalEntry(entry: JournalEntry) {
-  const { data, error } = await supabase
-    .from('journal_entries')
-    .update({
-      content: entry.content,
-      emotionLevel: entry.emotionLevel,
-      timestamp: entry.timestamp,
-      tags: entry.tags,
+    .from('user_settings')
+    .upsert({
+      userId,
+      journalSettings: settings,
     })
-    .eq('id', entry.id)
-    .eq('userId', entry.userId)
     .select()
     .single();
 
@@ -30,22 +17,13 @@ export async function updateJournalEntry(entry: JournalEntry) {
   return data;
 }
 
-export async function getJournalEntries(userId: string) {
+export async function getJournalSettings(userId: string) {
   const { data, error } = await supabase
-    .from('journal_entries')
-    .select('*')
+    .from('user_settings')
+    .select('journalSettings')
     .eq('userId', userId)
-    .order('timestamp', { ascending: false });
+    .single();
 
   if (error) throw error;
-  return data;
-}
-
-export async function deleteJournalEntry(id: string, userId: string) {
-  const { error } = await supabase
-    .from('journal_entries')
-    .delete()
-    .match({ id, userId });
-
-  if (error) throw error;
+  return data?.journalSettings as JournalSettings;
 }
