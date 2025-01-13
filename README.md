@@ -1,5 +1,5 @@
 # 日記アプリ
-Translate in English
+[Translate in English](./README_EN.md)
 
 ## イメージ
 ![image](https://github.com/user-attachments/assets/966717c9-8a6e-42a5-950e-8e3f4a154106)
@@ -12,10 +12,10 @@ Translate in English
 このアプリケーションは、ユーザーが1日の振り返りをするための Web アプリです。Next.js と Supabase を用いた認証機能や、感情レベル（落ち込み・落ち込み気味・普通・元気・とても元気）を可視化するコンポーネントを備えています。ユーザーはログインして日々の気持ちを記録し、振り返ることができます。
 
 ## 動作環境
-Node.js 18.x
-npm 9.x
-Next.js 13.x
-Supabase
+- Node.js 18.x
+- npm 9.x
+- Next.js 13.x
+- Supabase
 
 ## 環境構築
 - リポジトリをクローン後、以下のコマンドで依存関係をインストールしてください。
@@ -35,7 +35,6 @@ npm run dev
 
 ## 実装予定
 1. 環境変数を使用したリダイレクトURL設定
-1. ログイン時のリダイレクト処理の修正
 1. Next.jsでは静的コンテンツを自動でキャッシュしているか確認
 1. DBデータをキャッシュした方が安く運用できるか確認
 1. 今の気持ちを10メモリに変更
