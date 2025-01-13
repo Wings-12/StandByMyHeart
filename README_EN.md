@@ -2,7 +2,7 @@
 
 [Translate in Japanese](./README.md)
 
-## Image
+## Screenshots
 ![image](https://github.com/user-attachments/assets/966717c9-8a6e-42a5-950e-8e3f4a154106)
 
 ![image](https://github.com/user-attachments/assets/7b15bde1-b8ea-4103-9a2a-954bdd37593a)
