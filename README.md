@@ -1,11 +1,12 @@
 # 日記アプリ
 Translate in English
 
-App Image
+## イメージ
+![image](https://github.com/user-attachments/assets/966717c9-8a6e-42a5-950e-8e3f4a154106)
 
-## デモ
+![image](https://github.com/user-attachments/assets/7b15bde1-b8ea-4103-9a2a-954bdd37593a)
 
-!GIF
+![image](https://github.com/user-attachments/assets/0c515205-537e-4a26-bcdc-6c8c537bee20)
 
 ## 概要
 このアプリケーションは、ユーザーが1日の振り返りをするための Web アプリです。Next.js と Supabase を用いた認証機能や、感情レベル（落ち込み・落ち込み気味・普通・元気・とても元気）を可視化するコンポーネントを備えています。ユーザーはログインして日々の気持ちを記録し、振り返ることができます。
