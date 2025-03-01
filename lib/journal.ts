@@ -95,6 +95,26 @@ export async function getJournalSettings(userId: string) {
     .eq('userId', userId)
     .single();
 
+  // データが存在しない場合（404エラー）は、デフォルト値を返す
+  if (error?.code === 'PGRST116') {
+    const defaultSettings: JournalSettings = {
+      autoSave: false,
+      reminderEnabled: false,
+      templates: [],
+    };
+    return defaultSettings;
+  }
+
   if (error) throw error;
-  return data?.journalSettings as JournalSettings;
+
+  // データが存在するがjournalSettingsがnullの場合もデフォルト値を返す
+  if (!data?.journalSettings) {
+    return {
+      autoSave: false,
+      reminderEnabled: false,
+      templates: [],
+    };
+  }
+
+  return data.journalSettings as JournalSettings;
 }

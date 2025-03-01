@@ -35,8 +35,10 @@ export interface JournalTemplate {
  * Supabaseのuser_settingsテーブルのjournal_settingsカラムと対応
  */
 export interface JournalSettings {
-  templates?: JournalTemplate[];
-  defaultEmotionLevel?: number;
-  autoSaveInterval?: number;
-  defaultTags?: string[];
+  templates: JournalTemplate[];        // 日記テンプレートの配列
+  defaultEmotionLevel?: number;        // デフォルトの感情レベル
+  defaultTags?: string[];             // デフォルトのタグ
+  autoSave: boolean;                  // 自動保存の有効/無効
+  reminderEnabled: boolean;           // リマインダーの有効/無効
+  reminderTime?: string;              // リマインダーの時刻（HH:mm形式）
 }
