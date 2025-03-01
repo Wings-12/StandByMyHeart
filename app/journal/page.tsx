@@ -15,12 +15,16 @@ export default function JournalPage() {
   const { user } = useAuth();
 
   useEffect(() => {
+    // ユーザーがログインしている場合、日記エントリーを読み込む
     if (user) {
       loadEntries();
     }
   }, [user]);
 
   const loadEntries = async () => {
+    // ユーザーがログインしていない場合は何もしない
+    // ?の意味は、userがnullまたはundefinedの場合は何も返さない
+    // ページ読み込み中にユーザー認証が終わってない時のエラーを防ぐ
     if (!user?.id) return;
     try {
       const data = await getJournalEntries(user.id);
