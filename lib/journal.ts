@@ -6,14 +6,13 @@
  */
 
 import { supabase } from './supabase';
-import type { JournalEntry, JournalSettings } from './types';
+import type { JournalEntry, JournalSettings, JournalTemplate } from './types';
 
 /**
  * 新しい日記エントリーを保存
  * @param entry - 保存する日記エントリー（IDは自動生成）
  * @returns 保存された日記エントリー
  */
-
 export async function saveJournalEntry(entry: Omit<JournalEntry, 'id'>) {
   const { data, error } = await supabase
     .from('journal_entries')
@@ -75,27 +74,32 @@ export async function updateJournalEntry(entry: JournalEntry) {
 }
 
 export async function updateJournalSettings(userId: string, settings: JournalSettings) {
+  console.log('Updating settings for user:', userId, 'with:', settings);
   const { data, error } = await supabase
     .from('user_settings')
     .upsert({
-      userId,
+      userId: userId,
       journalSettings: settings,
     })
     .select()
     .single();
+
+  console.log('Update result:', { data, error });
 
   if (error) throw error;
   return data;
 }
 
 export async function getJournalSettings(userId: string) {
+  console.log('Getting settings for user:', userId);
   const { data, error } = await supabase
     .from('user_settings')
-    .select('journalSettings')
+    .select('*')
     .eq('userId', userId)
     .single();
 
-  // データが存在しない場合（404エラー）は、デフォルト値を返す
+  console.log('Settings query result:', { data, error });
+
   if (error?.code === 'PGRST116') {
     const defaultSettings: JournalSettings = {
       autoSave: false,
@@ -107,7 +111,6 @@ export async function getJournalSettings(userId: string) {
 
   if (error) throw error;
 
-  // データが存在するがjournalSettingsがnullの場合もデフォルト値を返す
   if (!data?.journalSettings) {
     return {
       autoSave: false,
@@ -117,4 +120,179 @@ export async function getJournalSettings(userId: string) {
   }
 
   return data.journalSettings as JournalSettings;
+}
+
+/**
+ * テンプレート関連の関数
+ */
+
+/**
+ * 新しいテンプレートを作成
+ * @param template - 作成するテンプレート
+ * @returns 作成されたテンプレート
+ */
+export async function createTemplate(template: Omit<JournalTemplate, 'id'>) {
+  try {
+    // 入力パラメータの確認
+    console.log('[createTemplate] Input template:', {
+      template_data: {
+        userId: template.userId,
+        title: template.title,
+        content_length: template.content?.length
+      },
+      validation: {
+        userId_exists: !!template.userId,
+        userId_type: typeof template.userId
+      }
+    });
+
+    // データベースに送信するデータを準備
+    // 必要なフィールドのみを送信
+    const insertData = {
+      user_id: template.userId,
+      title: template.title,
+      content: template.content
+    };
+
+    console.log('[createTemplate] Database operation:', {
+      operation: 'INSERT',
+      table: 'journal_templates',
+      payload: insertData
+    });
+
+    // 1回のクエリでinsertとselect
+    console.log('[createTemplate] Executing insert query with:', {
+      table: 'journal_templates',
+      insert_data: insertData
+    });
+
+    const { data, error } = await supabase
+      .from('journal_templates')
+      .insert(insertData)
+      .select()  // saveJournalEntryと同じスタイル
+      .single();
+
+    console.log('[createTemplate] Query result:', {
+      success: !error,
+      error_details: error ? {
+        code: error.code,
+        message: error.message,
+        details: error.details
+      } : null,
+      received_data: data ? {
+        id: data.id,
+        user_id: data.user_id,
+        title: data.title
+      } : null
+    });
+
+    // エラーが発生した場合
+    if (error) {
+      console.error('[createTemplate] Database error:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        request_payload: insertData
+      });
+      throw error;
+    }
+
+    // データが返却されなかった場合
+    if (!data) {
+      console.error('[createTemplate] No data returned after insert');
+      throw new Error('Template creation failed - no data returned');
+    }
+
+    // 成功時のレスポンスデータを確認
+    console.log('[createTemplate] Success:', {
+      received_data: {
+        id: data.id,
+        user_id: data.user_id,
+        title: data.title,
+        content_length: data.content?.length
+      }
+    });
+
+    // フロントエンド用の形式に変換して返却
+    return {
+      id: data.id,
+      userId: data.user_id,
+      title: data.title,
+      content: data.content,
+      tags: []
+    };
+  } catch (error) {
+    console.error('[createTemplate] Error:', {
+      error_type: error instanceof Error ? error.constructor.name : typeof error,
+      message: error instanceof Error ? error.message : String(error)
+    });
+    throw error;
+  }
+}
+
+/**
+ * ユーザーのテンプレート一覧を取得
+ * @param userId - ユーザーID
+ * @returns テンプレートのリスト
+ */
+export async function getTemplates(userId: string) {
+  const { data, error } = await supabase
+    .from('journal_templates')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  return data.map(item => ({
+    id: item.id,
+    userId: item.user_id,
+    title: item.title,
+    content: item.content,
+    tags: []
+  }));
+}
+
+/**
+ * テンプレートを更新
+ * @param template - 更新するテンプレート
+ * @returns 更新されたテンプレート
+ */
+export async function updateTemplate(template: JournalTemplate) {
+  const { data, error } = await supabase
+    .from('journal_templates')
+    .update({
+      title: template.title,
+      content: template.content
+    })
+    .eq('id', template.id)
+    .eq('user_id', template.userId)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return {
+    id: data.id,
+    userId: data.user_id,
+    title: data.title,
+    content: data.content,
+    tags: template.tags || []
+  };
+}
+
+/**
+ * テンプレートを削除
+ * @param id - テンプレートID
+ * @param userId - ユーザーID
+ */
+export async function deleteTemplate(id: string, userId: string) {
+  const { error } = await supabase
+    .from('journal_templates')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId);
+
+  if (error) throw error;
 }

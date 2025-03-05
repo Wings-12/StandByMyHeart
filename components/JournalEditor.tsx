@@ -9,8 +9,9 @@ import { EmotionLevelBar } from '@/components/EmotionLevelBar';
 import { TemplateSelector } from '@/components/journal/TemplateSelector';
 import { TemplateDialog } from '@/components/journal/TemplateDialog';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { getJournalSettings } from '@/lib/journal';
+import { getJournalSettings, getTemplates, createTemplate } from '@/lib/journal';
 import type { JournalEntry, JournalTemplate } from '@/lib/types';
+import { useToast } from '@/components/ui/use-toast';
 
 interface JournalEditorProps {
   onSave: (entry: Omit<JournalEntry, 'id' | 'userId'>) => Promise<void>;
@@ -25,6 +26,7 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
   const [templates, setTemplates] = useState<JournalTemplate[]>([]);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (initialEntry) {
@@ -43,10 +45,8 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
   const loadTemplates = async () => {
     if (!user) return;
     try {
-      const settings = await getJournalSettings(user.id);
-      if (settings?.templates) {
-        setTemplates(settings.templates);
-      }
+      const templates = await getTemplates(user.id);
+      setTemplates(templates);
     } catch (error) {
       console.error('テンプレートの読み込みに失敗しました:', error);
     }
@@ -82,13 +82,27 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
   const handleSaveTemplate = async (template: Omit<JournalTemplate, 'id' | 'userId'>) => {
     if (!user) return;
     
-    const newTemplate: JournalTemplate = {
-      ...template,
-      id: crypto.randomUUID(),
-      userId: user.id,
-    };
-
-    setTemplates(prev => [...prev, newTemplate]);
+    try {
+      const newTemplate = await createTemplate({
+        ...template,
+        userId: user.id,
+      });
+      
+      setTemplates(prev => [...prev, newTemplate]);
+      toast({
+        title: '保存完了',
+        description: 'テンプレートを保存しました。',
+      });
+      
+      return Promise.resolve();
+    } catch (error) {
+      toast({
+        title: 'エラー',
+        description: 'テンプレートの保存に失敗しました。',
+        variant: 'destructive',
+      });
+      return Promise.reject(error);
+    }
   };
 
   return (

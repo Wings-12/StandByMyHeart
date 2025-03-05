@@ -12,44 +12,107 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 import type { JournalTemplate } from "@/lib/types";
 
 interface TemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (template: Omit<JournalTemplate, 'id' | 'userId'>) => Promise<void>;
+  initialTemplate?: Omit<JournalTemplate, 'id' | 'userId'>;
 }
 
 export function TemplateDialog({
   open,
   onOpenChange,
   onSave,
+  initialTemplate,
 }: TemplateDialogProps) {
-  const [name, setName] = useState('');
-  const [content, setContent] = useState('');
+  const [title, setTitle] = useState(initialTemplate?.title || '');
+  const [content, setContent] = useState(initialTemplate?.content || '');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  // ダイアログが開かれたときに初期値をセット
+  const handleOpenChange = (open: boolean) => {
+    if (open && initialTemplate) {
+      setTitle(initialTemplate.title);
+      setContent(initialTemplate.content);
+    } else if (!open) {
+      // ダイアログが閉じられるときに値をリセット
+      setTitle(initialTemplate?.title || '');
+      setContent(initialTemplate?.content || '');
+    }
+    onOpenChange(open);
+  };
+
+  const validateForm = () => {
+    if (!title.trim()) {
+      toast({
+        title: "エラー",
+        description: "テンプレート名を入力してください",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!content.trim()) {
+      toast({
+        title: "エラー",
+        description: "テンプレート内容を入力してください",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
 
   const handleSave = async () => {
-    if (name.trim() && content.trim()) {
-      await onSave({ name, content });
-      setName('');
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    try {
+      await onSave({
+        title,
+        content,
+        tags: [],
+      });
+      
+      // 保存成功後、フォームをリセット
+      setTitle('');
       setContent('');
+      
+      toast({
+        title: "保存完了",
+        description: "テンプレートを保存しました",
+      });
+      
       onOpenChange(false);
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "テンプレートの保存に失敗しました",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>テンプレートを追加</DialogTitle>
+          <DialogTitle>
+            {initialTemplate ? "テンプレートを編集" : "テンプレートを追加"}
+          </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="name">テンプレート名</Label>
+            <Label htmlFor="title">テンプレート名</Label>
             <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder="朝の日記"
             />
           </div>
@@ -65,7 +128,9 @@ export function TemplateDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSave}>保存</Button>
+          <Button onClick={handleSave} disabled={isLoading}>
+            {isLoading ? "保存中..." : "保存"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
