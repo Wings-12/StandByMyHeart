@@ -42,3 +42,25 @@ export interface JournalSettings {
   reminderEnabled: boolean;           // リマインダーの有効/無効
   reminderTime?: string;              // リマインダーの時刻（HH:mm形式）
 }
+
+/**
+ * チャットメッセージの型定義
+ */
+export interface ChatMessage {
+  id: string;
+  userId: string;
+  content: string;
+  type: 'user' | 'ai';
+  timestamp: Date;
+}
+
+/**
+ * 感情レベルの型定義
+ */
+export enum EmotionLevel {
+  VeryDown = 1,
+  Down = 2,
+  Neutral = 3,
+  Upbeat = 4,
+  VeryUpbeat = 5
+}
