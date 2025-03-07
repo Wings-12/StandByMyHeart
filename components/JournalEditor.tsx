@@ -25,6 +25,7 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
   const [date, setDate] = useState<Date>(new Date());
   const [templates, setTemplates] = useState<JournalTemplate[]>([]);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>();
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -68,32 +69,45 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
     }
   };
 
-  const handleSelectTemplate = (template: JournalTemplate) => {
-    setContent(prev => {
-      // 既存の内容があれば、テンプレートを追加
-      if (prev.trim()) {
-        return `${prev}\n\n${template.content}`;
-      }
-      // 内容が空の場合は、テンプレートをそのまま設定
-      return template.content;
+  // contentの変更を監視
+  useEffect(() => {
+    const currentTemplate = templates.find(t => t.id === selectedTemplateId);
+
+    // 状態の整合性チェック
+    if (currentTemplate && content !== currentTemplate.content) {
+      console.log('警告：選択中テンプレートとcontentの内容が一致しません');
+    }
+  }, [content, selectedTemplateId, templates]);
+
+  // テンプレート選択時の状態変更を監視
+  useEffect(() => {
+    console.log('テンプレート選択状態変更:', {
+      テンプレートID: selectedTemplateId,
+      現在のcontent: content
     });
+  }, [selectedTemplateId]);
+
+  const handleSelectTemplate = (template: JournalTemplate) => {
+    // 1. テンプレート選択状態を更新
+    setSelectedTemplateId(template.id);
+    setContent(template.content);
   };
 
   const handleSaveTemplate = async (template: Omit<JournalTemplate, 'id' | 'userId'>) => {
     if (!user) return;
-    
+
     try {
       const newTemplate = await createTemplate({
         ...template,
         userId: user.id,
       });
-      
+
       setTemplates(prev => [...prev, newTemplate]);
       toast({
         title: '保存完了',
         description: 'テンプレートを保存しました。',
       });
-      
+
       return Promise.resolve();
     } catch (error) {
       toast({
@@ -115,8 +129,9 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
             </h3>
             <TemplateSelector
               templates={templates}
-              onSelectTemplate={handleSelectTemplate}
-              onAddTemplate={() => setIsTemplateDialogOpen(true)}
+              selectedTemplateId={selectedTemplateId}
+              onSelectTemplate={handleSelectTemplate} // テンプレート選択時の処理
+              onAddTemplate={() => setIsTemplateDialogOpen(true)}  //  新しいテンプレートを追加するボタンが押された時の処理
             />
           </div>
           <Textarea
@@ -133,7 +148,7 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
             onSelect={(date) => date && setDate(date)}
             className="rounded-md border"
           />
-          <EmotionLevelBar 
+          <EmotionLevelBar
             onLevelChange={setEmotionLevel}
             initialLevel={emotionLevel}
           />
