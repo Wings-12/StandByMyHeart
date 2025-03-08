@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -24,6 +25,7 @@ import {
 import type { JournalSettings, JournalTemplate } from '@/lib/types';
 
 export default function JournalSettingsPage() {
+  const router = useRouter();
   const [settings, setSettings] = useState<JournalSettings>({
     autoSave: false,
     reminderEnabled: false,
@@ -78,22 +80,8 @@ export default function JournalSettingsPage() {
     }
   };
 
-  const handleSaveSettings = async () => {
-    if (!user) return;
-
-    try {
-      await updateJournalSettings(user.id, settings);
-      toast({
-        title: '設定を保存しました',
-        description: '日記の設定を更新しました。',
-      });
-    } catch (error) {
-      toast({
-        title: 'エラー',
-        description: '設定の保存に失敗しました。',
-        variant: 'destructive',
-      });
-    }
+  const handleSaveSettings = () => {
+    router.push('/journal');
   };
 
   const handleSaveTemplate = async (template: Omit<JournalTemplate, 'id' | 'userId'>) => {
@@ -277,7 +265,7 @@ export default function JournalSettingsPage() {
         </Card>
 
         <Button onClick={handleSaveSettings} className="w-full">
-          設定を保存
+          日記に戻る
         </Button>
       </div>
 

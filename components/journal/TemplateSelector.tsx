@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { JournalTemplate } from "@/lib/types";
@@ -15,15 +16,14 @@ interface TemplateSelectorProps {
   templates: JournalTemplate[];
   selectedTemplateId?: string;
   onSelectTemplate: (template: JournalTemplate) => void;
-  onAddTemplate: () => void;
 }
 
 export function TemplateSelector({
   templates,
   selectedTemplateId,
   onSelectTemplate,
-  onAddTemplate,
 }: TemplateSelectorProps) {
+  const router = useRouter();
   // テンプレート選択時の処理
   const handleValueChange = (value: string) => {
 
@@ -67,7 +67,7 @@ export function TemplateSelector({
       <Button
         variant="outline"
         size="icon"
-        onClick={onAddTemplate}
+        onClick={() => router.push('/journal/settings')}
         title="新しいテンプレートを追加"
       >
         <PlusCircle className="h-4 w-4" />

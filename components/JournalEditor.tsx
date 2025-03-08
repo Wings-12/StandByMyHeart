@@ -7,9 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { EmotionLevelBar } from '@/components/EmotionLevelBar';
 import { TemplateSelector } from '@/components/journal/TemplateSelector';
-import { TemplateDialog } from '@/components/journal/TemplateDialog';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { getJournalSettings, getTemplates, createTemplate } from '@/lib/journal';
+import { getTemplates } from '@/lib/journal';
 import type { JournalEntry, JournalTemplate } from '@/lib/types';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -24,7 +23,6 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
   const [emotionLevel, setEmotionLevel] = useState(3);
   const [date, setDate] = useState<Date>(new Date());
   const [templates, setTemplates] = useState<JournalTemplate[]>([]);
-  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -93,32 +91,6 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
     setContent(template.content);
   };
 
-  const handleSaveTemplate = async (template: Omit<JournalTemplate, 'id' | 'userId'>) => {
-    if (!user) return;
-
-    try {
-      const newTemplate = await createTemplate({
-        ...template,
-        userId: user.id,
-      });
-
-      setTemplates(prev => [...prev, newTemplate]);
-      toast({
-        title: '保存完了',
-        description: 'テンプレートを保存しました。',
-      });
-
-      return Promise.resolve();
-    } catch (error) {
-      toast({
-        title: 'エラー',
-        description: 'テンプレートの保存に失敗しました。',
-        variant: 'destructive',
-      });
-      return Promise.reject(error);
-    }
-  };
-
   return (
     <Card className="p-6 space-y-6">
       <div className="flex flex-col md:flex-row gap-6">
@@ -130,8 +102,7 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
             <TemplateSelector
               templates={templates}
               selectedTemplateId={selectedTemplateId}
-              onSelectTemplate={handleSelectTemplate} // テンプレート選択時の処理
-              onAddTemplate={() => setIsTemplateDialogOpen(true)}  //  新しいテンプレートを追加するボタンが押された時の処理
+              onSelectTemplate={handleSelectTemplate}
             />
           </div>
           <Textarea
@@ -165,11 +136,6 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
         </Button>
       </div>
 
-      <TemplateDialog
-        open={isTemplateDialogOpen}
-        onOpenChange={setIsTemplateDialogOpen}
-        onSave={handleSaveTemplate}
-      />
     </Card>
   );
 }
