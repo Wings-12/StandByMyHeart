@@ -23,11 +23,12 @@ interface TemplateDialogProps {
 }
 
 export function TemplateDialog({
-  open,
-  onOpenChange,
-  onSave,
-  initialTemplate,
+  open, // ダイアログの開閉状態
+  onOpenChange, // ダイアログの開閉状態を変更する関数
+  onSave, // テンプレートを保存する関数
+  initialTemplate, // 編集するテンプレートの初期値
 }: TemplateDialogProps) {
+  console.log('TemplateDialog コンポーネントがレンダリングされました');
   const [title, setTitle] = useState(initialTemplate?.title || '');
   const [content, setContent] = useState(initialTemplate?.content || '');
   const [isLoading, setIsLoading] = useState(false);
@@ -76,16 +77,16 @@ export function TemplateDialog({
         content,
         tags: [],
       });
-      
+
       // 保存成功後、フォームをリセット
       setTitle('');
       setContent('');
-      
+
       toast({
         title: "保存完了",
         description: "テンプレートを保存しました",
       });
-      
+
       onOpenChange(false);
     } catch (error) {
       toast({

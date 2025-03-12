@@ -209,8 +209,9 @@ export default function TemplateManagementPage() {
       <TemplateDialog
         open={isTemplateDialogOpen}
         onOpenChange={setIsTemplateDialogOpen}
-        onSave={handleSaveTemplate}
-        initialTemplate={editingTemplate}
+        onSave={handleSaveTemplate} // 保存処理を渡す
+        initialTemplate={editingTemplate} // 編集モードの場合は初期値を渡す
+        key={editingTemplate?.title} // ここでkeyを設定することで、編集モードの場合にダイアログが再レンダリングされる
       />
     </div>
   );
