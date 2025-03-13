@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { getTemplates, createTemplate, deleteTemplate } from '@/lib/journal';
+import { getTemplates, createTemplate, deleteTemplate, updateTemplate } from '@/lib/journal';
 import { TemplateDialog } from '@/components/journal/TemplateDialog';
 import { Trash2, Pencil } from 'lucide-react';
 import {
@@ -20,13 +20,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import type { JournalTemplate } from '@/lib/types';
+import type { JournalTemplateWithId, BaseJournalTemplate } from '@/lib/types';
 
 export default function TemplateManagementPage() {
   const router = useRouter();
-  const [templates, setTemplates] = useState<JournalTemplate[]>([]);
+  const [templates, setTemplates] = useState<JournalTemplateWithId[]>([]);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<Omit<JournalTemplate, 'id' | 'userId'> | undefined>(undefined);
+  const [editingTemplate, setEditingTemplate] = useState<Omit<JournalTemplateWithId, 'userId'> | undefined>(undefined); // (undefined)はuseState フックの初期値を undefined に設定している
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -56,23 +56,38 @@ export default function TemplateManagementPage() {
     router.push('/journal');
   };
 
-  const handleSaveTemplate = async (template: Omit<JournalTemplate, 'id' | 'userId'>) => {
+    /**
+   * テンプレートの保存処理
+   * TemplateDialogコンポーネントから呼び出される
+   *
+   * @param {Omit<JournalTemplateWithId, 'userId'>} selectedTemplate
+   * @return {*}  {Promise<void>}
+   * @memberof TemplateManagementPage
+   */
+  const handleSaveTemplate = async (selectedTemplate: Omit<JournalTemplateWithId, 'userId'>) => {
     if (!user) return;
 
     try {
-      console.log('Current user:', user);
-      console.log('Creating template with:', {
-        ...template,
-        userId: user.id,
-      });
+      if (selectedTemplate.id) {
+        const updatedTemplate = await updateTemplate({
+          ...selectedTemplate,
+          userId: user.id,
+        });
 
-      const newTemplate = await createTemplate({
-        ...template,
-        userId: user.id,
-      });
+        // テンプレート一覧を更新
+        setTemplates(prev =>
+          prev.map(eachTemplate => (eachTemplate.id === selectedTemplate.id ? updatedTemplate : eachTemplate))
+        );
+      } else {
+        // 新しいテンプレートを作成
+        const newTemplate = await createTemplate({
+          ...selectedTemplate,
+          userId: user.id,
+        });
 
-      // テンプレート一覧を更新
-      setTemplates(prev => [...prev, newTemplate]);
+        // テンプレート一覧を更新
+        setTemplates(prev => [...prev, newTemplate]);
+      }
 
       // 編集モードをリセット
       setEditingTemplate(undefined);
@@ -110,8 +125,9 @@ export default function TemplateManagementPage() {
     }
   };
 
-  const handleEditTemplate = (template: JournalTemplate) => {
+  const handleEditTemplate = (template: JournalTemplateWithId) => {
     setEditingTemplate({
+      id: template.id,
       title: template.title,
       content: template.content,
       tags: template.tags,
@@ -210,7 +226,7 @@ export default function TemplateManagementPage() {
         open={isTemplateDialogOpen}
         onOpenChange={setIsTemplateDialogOpen}
         onSave={handleSaveTemplate} // 保存処理を渡す
-        initialTemplate={editingTemplate} // 編集モードの場合は初期値を渡す
+        selectedTemplate={editingTemplate} // 編集モードの場合は初期値を渡す
         key={editingTemplate?.title} // ここでkeyを設定することで、編集モードの場合にダイアログが再レンダリングされる
       />
     </div>

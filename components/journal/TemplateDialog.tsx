@@ -13,36 +13,35 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import type { JournalTemplate } from "@/lib/types";
+import type { BaseJournalTemplate, JournalTemplateWithId } from "@/lib/types";
 
 interface TemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (template: Omit<JournalTemplate, 'id' | 'userId'>) => Promise<void>;
-  initialTemplate?: Omit<JournalTemplate, 'id' | 'userId'>;
+  onSave: (template: Omit<BaseJournalTemplate, 'userId'>) => Promise<void>;
+  selectedTemplate?: Omit<JournalTemplateWithId, 'userId'>;
 }
 
 export function TemplateDialog({
   open, // ダイアログの開閉状態
   onOpenChange, // ダイアログの開閉状態を変更する関数
   onSave, // テンプレートを保存する関数
-  initialTemplate, // 編集するテンプレートの初期値
+  selectedTemplate: selectedTemplate, // 編集するテンプレートの初期値
 }: TemplateDialogProps) {
-  console.log('TemplateDialog コンポーネントがレンダリングされました');
-  const [title, setTitle] = useState(initialTemplate?.title || '');
-  const [content, setContent] = useState(initialTemplate?.content || '');
+  const [title, setTitle] = useState(selectedTemplate?.title || '');
+  const [content, setContent] = useState(selectedTemplate?.content || '');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   // ダイアログが開かれたときに初期値をセット
   const handleOpenChange = (open: boolean) => {
-    if (open && initialTemplate) {
-      setTitle(initialTemplate.title);
-      setContent(initialTemplate.content);
+    if (open && selectedTemplate) {
+      setTitle(selectedTemplate.title);
+      setContent(selectedTemplate.content);
     } else if (!open) {
       // ダイアログが閉じられるときに値をリセット
-      setTitle(initialTemplate?.title || '');
-      setContent(initialTemplate?.content || '');
+      setTitle(selectedTemplate?.title || '');
+      setContent(selectedTemplate?.content || '');
     }
     onOpenChange(open);
   };
@@ -73,6 +72,7 @@ export function TemplateDialog({
     setIsLoading(true);
     try {
       await onSave({
+        ...(selectedTemplate?.id ? { id: selectedTemplate.id } : {}),
         title,
         content,
         tags: [],
@@ -104,7 +104,7 @@ export function TemplateDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {initialTemplate ? "テンプレートを編集" : "テンプレートを追加"}
+            {selectedTemplate ? "テンプレートを編集" : "テンプレートを追加"}
           </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">

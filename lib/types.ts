@@ -19,11 +19,9 @@ export interface JournalEntry {
 }
 
 /**
- * 日記テンプレートの型定義
- * 日記作成時に使用できるテンプレート
+ * ID を含まない、基本的な JournalTemplate の型
  */
-export interface JournalTemplate {
-  id: string;
+export interface BaseJournalTemplate {
   userId: string;
   title: string;
   content: string;
@@ -31,11 +29,18 @@ export interface JournalTemplate {
 }
 
 /**
+ * ID を含む JournalTemplate の型
+ */
+export interface JournalTemplateWithId extends BaseJournalTemplate {
+  id: string;
+}
+
+/**
  * ユーザーごとの日記設定の型定義
  * Supabaseのuser_settingsテーブルのjournal_settingsカラムと対応
  */
 export interface JournalSettings {
-  templates: JournalTemplate[];        // 日記テンプレートの配列
+  templates: JournalTemplateWithId[];        // 日記テンプレートの配列
   defaultEmotionLevel?: number;        // デフォルトの感情レベル
   defaultTags?: string[];             // デフォルトのタグ
   autoSave: boolean;                  // 自動保存の有効/無効

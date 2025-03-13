@@ -6,7 +6,7 @@
  */
 
 import { supabase } from './supabase';
-import type { JournalEntry, JournalSettings, JournalTemplate } from './types';
+import type { JournalEntry, JournalSettings, BaseJournalTemplate, JournalTemplateWithId } from './types';
 
 /**
  * 新しい日記エントリーを保存
@@ -131,7 +131,7 @@ export async function getJournalSettings(userId: string) {
  * @param template - 作成するテンプレート
  * @returns 作成されたテンプレート
  */
-export async function createTemplate(template: Omit<JournalTemplate, 'id'>) {
+export async function createTemplate(template: Omit<BaseJournalTemplate, 'id'>) {
   try {
     // 入力パラメータの確認
     console.log('[createTemplate] Input template:', {
@@ -256,18 +256,18 @@ export async function getTemplates(userId: string) {
 
 /**
  * テンプレートを更新
- * @param template - 更新するテンプレート
+ * @param selectedTemplate - 更新するテンプレート
  * @returns 更新されたテンプレート
  */
-export async function updateTemplate(template: JournalTemplate) {
+export async function updateTemplate(selectedTemplate: JournalTemplateWithId) {
   const { data, error } = await supabase
     .from('journal_templates')
     .update({
-      title: template.title,
-      content: template.content
+      title: selectedTemplate.title,
+      content: selectedTemplate.content
     })
-    .eq('id', template.id)
-    .eq('user_id', template.userId)
+    .eq('id', selectedTemplate.id)
+    .eq('user_id', selectedTemplate.userId)
     .select()
     .single();
 
@@ -278,7 +278,7 @@ export async function updateTemplate(template: JournalTemplate) {
     userId: data.user_id,
     title: data.title,
     content: data.content,
-    tags: template.tags || []
+    tags: selectedTemplate.tags || []
   };
 }
 
