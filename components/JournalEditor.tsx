@@ -9,7 +9,7 @@ import { EmotionLevelBar } from '@/components/EmotionLevelBar';
 import { TemplateSelector } from '@/components/journal/TemplateSelector';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { getTemplates } from '@/lib/journal';
-import type { JournalEntry, JournalTemplate } from '@/lib/types';
+import type { JournalEntry, JournalTemplateWithId } from '@/lib/types';
 import { useToast } from '@/components/ui/use-toast';
 
 interface JournalEditorProps {
@@ -22,7 +22,7 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
   const [content, setContent] = useState('');
   const [emotionLevel, setEmotionLevel] = useState(3);
   const [date, setDate] = useState<Date>(new Date());
-  const [templates, setTemplates] = useState<JournalTemplate[]>([]);
+  const [templates, setTemplates] = useState<JournalTemplateWithId[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -85,7 +85,7 @@ export function JournalEditor({ onSave, initialEntry, onCancel }: JournalEditorP
     });
   }, [selectedTemplateId]);
 
-  const handleSelectTemplate = (template: JournalTemplate) => {
+  const handleSelectTemplate = (template: JournalTemplateWithId) => {
     // 1. テンプレート選択状態を更新
     setSelectedTemplateId(template.id);
     setContent(template.content);

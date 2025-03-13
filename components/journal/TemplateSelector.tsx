@@ -10,12 +10,12 @@ import {
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { JournalTemplate } from "@/lib/types";
+import { JournalTemplateWithId } from "@/lib/types";
 
 interface TemplateSelectorProps {
-  templates: JournalTemplate[];
+  templates: JournalTemplateWithId[];
   selectedTemplateId?: string;
-  onSelectTemplate: (template: JournalTemplate) => void;
+  onSelectTemplate: (template: JournalTemplateWithId) => void;
 }
 
 export function TemplateSelector({
