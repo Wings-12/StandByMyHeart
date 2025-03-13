@@ -18,7 +18,7 @@ import type { BaseJournalTemplate, JournalTemplateWithId } from "@/lib/types";
 interface TemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (template: Omit<BaseJournalTemplate, 'userId'>) => Promise<void>;
+  onSave: (template: Omit<JournalTemplateWithId, 'userId'> | Omit<BaseJournalTemplate, 'userId'>) => Promise<void>;
   selectedTemplate?: Omit<JournalTemplateWithId, 'userId'>;
 }
 

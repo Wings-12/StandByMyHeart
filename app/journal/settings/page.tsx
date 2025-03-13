@@ -64,11 +64,11 @@ export default function TemplateManagementPage() {
    * @return {*}  {Promise<void>}
    * @memberof TemplateManagementPage
    */
-  const handleSaveTemplate = async (selectedTemplate: Omit<JournalTemplateWithId, 'userId'>) => {
+  const handleSaveTemplate = async (selectedTemplate: Omit<JournalTemplateWithId, 'userId'> | Omit<BaseJournalTemplate, 'userId'>) => {
     if (!user) return;
 
     try {
-      if (selectedTemplate.id) {
+      if ('id' in selectedTemplate) {
         const updatedTemplate = await updateTemplate({
           ...selectedTemplate,
           userId: user.id,
