@@ -19,6 +19,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const isDevelopment = process.env.NODE_ENV === 'development' && 
+                         process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('dummy');
+    
+    if (isDevelopment) {
+      const mockUser = {
+        id: 'mock-user-id',
+        email: 'test@example.com',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated',
+        role: 'authenticated'
+      } as User;
+      
+      setUser(mockUser);
+      setLoading(false);
+      return;
+    }
+
     // 現在のセッションを取得
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Current session:', session);

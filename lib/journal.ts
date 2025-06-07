@@ -16,12 +16,26 @@ import type { JournalEntry, JournalSettings, BaseJournalTemplate, JournalTemplat
 export async function saveJournalEntry(entry: Omit<JournalEntry, 'id'>) {
   const { data, error } = await supabase
     .from('journal_entries')
-    .insert(entry)
-    .select() // すべてのカラムを取得
-    .single(); // 今回insertしたエントリーのみを取得
+    .insert({
+      user_id: entry.userId,
+      content: entry.content,
+      emotion_level: entry.emotionLevel,
+      timestamp: entry.timestamp.toISOString(),
+      tags: entry.tags
+    })
+    .select()
+    .single();
 
   if (error) throw error;
-  return data;
+  
+  return {
+    id: data.id,
+    userId: data.user_id,
+    content: data.content,
+    emotionLevel: data.emotion_level,
+    timestamp: new Date(data.timestamp),
+    tags: data.tags
+  };
 }
 
 /**
@@ -33,11 +47,19 @@ export async function getJournalEntries(userId: string) {
   const { data, error } = await supabase
     .from('journal_entries')
     .select('*')
-    .eq('userId', userId)
+    .eq('user_id', userId)
     .order('timestamp', { ascending: false });
 
   if (error) throw error;
-  return data;
+  
+  return data.map(entry => ({
+    id: entry.id,
+    userId: entry.user_id,
+    content: entry.content,
+    emotionLevel: entry.emotion_level,
+    timestamp: new Date(entry.timestamp),
+    tags: entry.tags
+  }));
 }
 
 /**
@@ -49,8 +71,8 @@ export async function deleteJournalEntry(id: string, userId: string) {
   const { error } = await supabase
     .from('journal_entries')
     .delete()
-    .eq('id', id) // idが一致するエントリー
-    .eq('userId', userId); // userIdが一致するエントリー
+    .eq('id', id)
+    .eq('user_id', userId);
 
   if (error) throw error;
 }
@@ -60,17 +82,25 @@ export async function updateJournalEntry(entry: JournalEntry) {
     .from('journal_entries')
     .update({
       content: entry.content,
-      emotionLevel: entry.emotionLevel,
-      timestamp: entry.timestamp,
+      emotion_level: entry.emotionLevel,
+      timestamp: entry.timestamp.toISOString(),
       tags: entry.tags,
     })
     .eq('id', entry.id)
-    .eq('userId', entry.userId)
+    .eq('user_id', entry.userId)
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+  
+  return {
+    id: data.id,
+    userId: data.user_id,
+    content: data.content,
+    emotionLevel: data.emotion_level,
+    timestamp: new Date(data.timestamp),
+    tags: data.tags
+  };
 }
 
 export async function updateJournalSettings(userId: string, settings: JournalSettings) {
