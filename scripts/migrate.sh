@@ -4,7 +4,7 @@
 source .env.local
 
 # データベースURLの設定
-DB_URL="postgres://postgres.vtmnvggeffmxdptlopep:$SUPABASE_DB_PASSWORD@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
+DB_URL="postgres://postgres.${SUPABASE_PROJECT_ID}:$SUPABASE_DB_PASSWORD@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
 
 # コマンドライン引数の処理
 COMMAND=${1:-"up"}  # デフォルトは "up"

@@ -19,6 +19,7 @@
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_DB_PASSWORD=your-db-password
+SUPABASE_PROJECT_ID=your-project-id
 ```
 
 > **注意**: `.env.local`ファイルはGitにコミットしないでください。パスワードなどの機密情報が含まれています。
@@ -30,7 +31,7 @@ SUPABASE_DB_PASSWORD=your-db-password
 ```bash
 #!/bin/bash
 source .env.local
-supabase migration up --db-url "postgres://postgres.vtmnvggeffmxdptlopep:$SUPABASE_DB_PASSWORD@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
+supabase migration up --db-url "postgres://postgres.${SUPABASE_PROJECT_ID}:$SUPABASE_DB_PASSWORD@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
 ```
 
 ## マイグレーションファイルの作成
@@ -107,7 +108,7 @@ CREATE POLICY "Users can view own data" ON public.users
 スクリプトを使用せずに直接実行する場合：
 
 ```bash
-source .env.local && supabase migration up --db-url "postgres://postgres.vtmnvggeffmxdptlopep:$SUPABASE_DB_PASSWORD@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
+source .env.local && supabase migration up --db-url "postgres://postgres.${SUPABASE_PROJECT_ID}:$SUPABASE_DB_PASSWORD@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
 ```
 
 ## トラブルシューティング
