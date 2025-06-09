@@ -57,6 +57,19 @@ export interface ChatMessage {
   content: string;
   type: 'user' | 'ai';
   timestamp: Date;
+  conversationId?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface AIConversation {
+  id: string;
+  userId: string;
+  title?: string;
+  summary?: string;
+  journalEntryId?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 /**

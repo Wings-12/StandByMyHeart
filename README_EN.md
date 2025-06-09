@@ -29,8 +29,26 @@ This web application allows users to reflect on their day. It features authentic
   npm run dev
   ```
 
+# Environment Variables Setup
+
+## Local Development
+Create a `.env.local` file and set the following environment variables:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_DB_PASSWORD=your-db-password
+SUPABASE_PROJECT_ID=your-project-id
+```
+
+## Production (Netlify)
+Configure the following environment variables in Netlify:
+- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+
 # Notes
-Configure environment variables in files like .env.local.
+- Do not commit `.env.local` files to Git
+- Ensure Netlify environment variables are correctly configured for production
 
 # TODO:
 1. Set up redirect URLs using environment variables.

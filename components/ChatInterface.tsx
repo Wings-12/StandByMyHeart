@@ -50,13 +50,21 @@ export function ChatInterface({
             }`}
           >
             <div
-              className={`inline-block p-3 rounded-lg ${
+              className={`inline-block p-3 rounded-lg max-w-[80%] ${
                 message.type === 'user'
                   ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted'
+                  : 'bg-orange-100 text-orange-900 border border-orange-200'
               }`}
             >
-              {message.content}
+              {message.type === 'ai' && (
+                <div className="flex items-center mb-2">
+                  <span className="text-xs font-semibold text-orange-600">🦖 アグモン</span>
+                </div>
+              )}
+              <div className="whitespace-pre-wrap">{message.content}</div>
+              <div className="text-xs opacity-70 mt-1">
+                {message.timestamp.toLocaleTimeString()}
+              </div>
             </div>
           </div>
         ))}

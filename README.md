@@ -39,8 +39,26 @@ npm run build
 ## 使い方
 日記ページでは、気持ちと感情レベルを入力して記録できます。
 
+## 環境変数の設定
+
+### ローカル開発環境
+`.env.local`ファイルを作成し、以下の環境変数を設定してください：
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_DB_PASSWORD=your-db-password
+SUPABASE_PROJECT_ID=your-project-id
+```
+
+### 本番環境（Netlify）
+Netlifyの環境変数設定で以下を設定してください：
+- `NEXT_PUBLIC_SUPABASE_URL`: SupabaseプロジェクトのURL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabaseの匿名キー
+
 ## 注意事項
-環境変数は .env.local などで設定してください。
+- `.env.local`ファイルはGitにコミットしないでください
+- 本番環境では必ずNetlifyの環境変数を正しく設定してください
 
 ## 実装予定
 1. 環境変数を使用したリダイレクトURL設定
